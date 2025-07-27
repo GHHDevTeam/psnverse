@@ -8,6 +8,38 @@
     Meiryo,
     sans-serif;
 }
+
+/* レスポンシブレイアウト */
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* 画像のレスポンシブ対応 */
+.post-image {
+    max-width: 300px;
+    max-height: 300px;
+    width: auto;
+    height: auto;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* コンテナ */
+.post-form {
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.image-upload-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+}
 article{
     border-top: 1px solid #999999;
     border-bottom: 1px solid #999999;
@@ -379,4 +411,118 @@ grey_t{
 }
 .action_btn form{
     display: inline-block;
+}
+
+/* モバイル対応 */
+@media screen and (max-width: 768px) {
+    /* ナビゲーション */
+    mb ul li a {
+        padding: 8px 5px;
+        font-size: 12px;
+    }
+    
+    /* フォーム要素 */
+    .design1 {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .design1 input[type=text],
+    .design1 input[type=password] {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    .designt {
+        width: 100%;
+        max-width: none;
+    }
+    
+    .designt textarea {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+        resize: vertical;
+    }
+    
+    .submit-btn {
+        width: 100% !important;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* 画像 */
+    .post-image {
+        max-width: 100%;
+        max-height: 250px;
+        width: auto;
+        height: auto;
+    }
+    
+    article img {
+        max-width: 100%;
+        height: auto;
+    }
+    
+    /* センターブロック */
+    center {
+        margin: 10px;
+        padding: 10px;
+    }
+    
+    /* アクションボタン */
+    .action_btn {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .action_btn form {
+        flex: 1;
+        min-width: 120px;
+    }
+    
+    .action_btn button {
+        width: 100%;
+        padding: 8px 5px;
+        font-size: 12px;
+    }
+    
+    /* 画像アップロード */
+    .image-upload-container {
+        flex-direction: column;
+    }
+    
+    .designf label {
+        width: 100% !important;
+    }
+    
+    /* 記事レイアウト */
+    article {
+        margin: 10px;
+        padding: 10px;
+    }
+    
+    /* 投稿フォーム */
+    .post-form {
+        padding: 15px;
+    }
+}
+
+/* タブレット対応 */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .post-form {
+        max-width: 700px;
+    }
+    
+    .post-image {
+        max-width: 400px;
+        max-height: 400px;
+    }
+    
+    .design1, .designt {
+        width: 90%;
+        max-width: 500px;
+    }
 }

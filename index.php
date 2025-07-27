@@ -40,6 +40,7 @@ function render_header($title = 'Psnverse') {
     $current_user = $_SESSION['user'] ?? null;
     echo '<!DOCTYPE html><html><head>';
     echo '<meta charset="UTF-8">';
+    echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
     echo '<title>' . htmlspecialchars($title) . '</title>';
     echo '<link rel="stylesheet" href="main.css" type="text/css">';
     echo '<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>';
@@ -554,7 +555,8 @@ EOD;
                     echo '</div>';
                     
                     if (isset($post['image'])) {
-                        echo '<img width="300" height="300" src="' . htmlspecialchars($post['image']) . '"/><br>';
+                        echo '<a href="' . htmlspecialchars($post['image']) . '" target="_blank">';
+                        echo '<img class="post-image" src="' . htmlspecialchars($post['image']) . '"/></a><br>';
                     }
                     
                     echo '<p>' . format_text($post['body']) . '</p>';
@@ -642,7 +644,7 @@ EOD;
             
             if (isset($post['image'])) {
                 echo '<a href="' . htmlspecialchars($post['image']) . '" target="_blank">';
-                echo '<img width="300" height="300" src="' . htmlspecialchars($post['image']) . '"/></a><br>';
+                echo '<img class="post-image" src="' . htmlspecialchars($post['image']) . '"/></a><br>';
             }
             
             echo '<p>' . format_text($post['body']) . '</p>';
@@ -728,19 +730,19 @@ EOD;
             
             if ($body) {
                 if (isset($_SESSION['user'])) {
-                    // ログインユーザー
+                    // ログインユーザーのみ画像アップロード可能
                     $name = trim($_POST['poster_name'] ?? $_SESSION['user']);
                     $author_id = '@' . $_SESSION['user_id'];
                     $image = handle_image_upload();
                     $id = add_post($posts_file, '', $body, $name, $author_id, $image);
                 } else {
-                    // ゲストユーザー
+                    // ゲストユーザーは画像アップロード不可
                     $name = trim($_POST['poster_name'] ?? 'ゲスト');
                     $password = $_POST['password'] ?? '';
                     if ($password) {
                         $guest_id = generate_guest_id($_SERVER['REMOTE_ADDR']);
-                        $image = handle_image_upload();
-                        $id = add_guest_post($posts_file, '', $body, $name, $guest_id, $password, $image);
+                        // ゲストユーザーは画像なし
+                        $id = add_guest_post($posts_file, '', $body, $name, $guest_id, $password, null);
                     } else {
                         echo '<p style="color:red;">ゲスト投稿にはパスワードが必要です。</p>';
                         break;
@@ -780,30 +782,32 @@ EOD;
         if (isset($_SESSION['user'])) {
             $name_input = '<input id="poster_name" name="poster_name" type="text" placeholder="お名前" size="30" value="' . htmlspecialchars($_SESSION['user']) . '"/>
             <input id="password" name="password" type="hidden" value=""/>';
+            $image_upload = '<div class="image-upload-container">
+<ele class="designf">
+<label style="width:51px;">画像<input type="file" name="post_pv_image" id="post_pv_image" onchange="selected_img.value = this.value.replace(/.*\\\\/g ,\'\');"/></label>
+</ele>
+<ele class="design1">
+<input id="selected_img" type="text" value="画像が選択されていません。" disabled size="60"/>
+</ele>
+</div>';
         } else {
             $name_input = '<input id="poster_name" name="poster_name" type="text" placeholder="お名前" size="30" required/>
             <input id="password" name="password" type="password" placeholder="削除用パスワード" size="30" required/>';
+            $image_upload = ''; // ゲストユーザーは画像アップロード不可
         }
         
         echo <<<EOD
 <form action="" method="post" enctype="multipart/form-data">
-<div>
+<div class="post-form">
 <ele class="design1">
 {$name_input}
 </ele><br>
 <ele class="designt">
 <textarea id="post_pv_value" name="post_pv_value" rows="8" cols="69" oninput="post_pv_onchange()" placeholder="文章を入力してください。"></textarea>
 </ele><br>
-<div style="display:inline-flex">
-<ele class="designf">
-<label style="width:51px;">画像<input type="file" name="post_pv_image" id="post_pv_image" onchange="selected_img.value = this.value.replace(/.*\\\\/g ,'');"/></label>
-</ele>
-<ele class="design1">
-<input id="selected_img" type="text" value="画像が選択されていません。" disabled size="60"/>
-</ele>
-</div><br>
+{$image_upload}
 <ele class="designb">
-<input style="width:523px;" type="submit" value="投稿" id="post_pv_button" disabled/>
+<input class="submit-btn" type="submit" value="投稿" id="post_pv_button" disabled/>
 </ele>
 </div>
 </form>
@@ -846,7 +850,8 @@ EOD;
                 echo '</div>';
                 
                 if (isset($post['image'])) {
-                    echo '<img width="300" height="300" src="' . htmlspecialchars($post['image']) . '"/><br>';
+                    echo '<a href="' . htmlspecialchars($post['image']) . '" target="_blank">';
+                    echo '<img class="post-image" src="' . htmlspecialchars($post['image']) . '"/></a><br>';
                 }
                 
                 echo '<p>' . format_text($post['body']) . '</p>';
