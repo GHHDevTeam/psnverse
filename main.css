@@ -1,0 +1,382 @@
+*{
+    margin:0;
+    padding:0;
+    font-family: "Helvetica Neue",
+    Arial,
+    "Hiragino Kaku Gothic ProN",
+    "Hiragino Sans",
+    Meiryo,
+    sans-serif;
+}
+article{
+    border-top: 1px solid #999999;
+    border-bottom: 1px solid #999999;
+}
+center2{
+    text-align : center;
+    margin : 0 auto;
+}
+center{
+    margin: 16px auto;
+	text-align: center;
+ 	display: block;
+	border: 1px solid #000;
+}
+
+center text {
+	padding-left: 0;
+  	text-align: 0;
+    display: inline-block;
+}
+center ui {
+	padding-left: 0;
+	display: inline-block;
+}
+center ui li {
+	text-align: left;
+}
+mb ul{
+    position: fixed;
+    z-index: 1;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+	overflow: hidden;
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	background-color: rgb(15, 15, 185);
+    width: 100%;
+    border-bottom: 1px solid #999999;
+
+}
+mb left{
+    background: rgb(15, 15, 185);
+    float: left;
+}
+mb right{
+    background: rgb(15, 15, 185);
+    float: right;
+}
+mb li ul{
+    margin: 0 0 0 auto;
+    border: 1px solid #999999;
+    width: 10%;
+    color: #FFFFFF;
+    line-height: 15px;
+}
+mb ul li a{
+    display: block;
+    text-align: center;
+    width: 100%;
+    padding: 10px 0;
+    text-decoration: none;
+    color: #fff;
+}
+mb ul li a:hover{
+    background-color:rgb(10, 10, 130);
+}
+mb ul ul {
+    display: none;
+}
+窶�.link1 {
+    position: relative;
+    z-index: 1;
+}
+窶�.link1 a {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-indent:-999px;
+    z-index: 2; 
+}
+.link1 a.inlink {
+    position: relative;
+    z-index: 3;
+}
+
+/*--------------------------------------
+繝�く繧ｹ繝�
+---------------------------------------*/
+
+.design1 {
+  padding-bottom: 20px;
+  width: 460px;
+}
+.design1 label {
+  display: block;
+  padding-bottom: 5px;
+}
+.design1 input[type=text] {
+  background: #fff;
+  border-radius: 3px;
+  border: 1px solid #999999;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  padding: 10px;
+}
+.design1 input[type=password] {
+  background: #fff;
+  border-radius: 3px;
+  border: 1px solid #999999;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  padding: 10px;
+}
+
+/*--------------------------------------
+繝ｩ繧ｸ繧ｪ繝懊ち繝ｳ
+---------------------------------------*/
+
+.msr_radio_05 {
+  padding-bottom: 20px;
+}
+.msr_radio_05 p {
+  font-size: 14px;
+  padding-bottom: 5px;
+}
+.msr_radio_05 input[type=radio] {
+  display: none;
+  margin: 0;
+}
+.msr_radio_05 input[type=radio] + label {
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1.5px;
+  margin-right: 12px;
+  padding: 0 0 0px 24px;
+  position: relative;
+}
+.msr_radio_05 input[type=radio] + label::before {
+  border: 1px solid #777777;
+  border-radius: 50%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  content: "";
+  display: block;
+  margin-top: -9px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 16px;
+  width: 16px;
+}
+.msr_radio_05 input[type=radio]:checked + label::after {
+  background: #333333;
+  border-radius: 50%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  content: "";
+  display: block;
+  margin-top: -4px;
+  position: absolute;
+  left: 4px;
+  top: 0;
+  height: 8px;
+  width: 8px;
+}
+
+/*--------------------------------------
+繝√ぉ繝�け繝懊ャ繧ｯ繧ｹ
+---------------------------------------*/
+
+.msr_chack_05 {
+  padding-bottom: 20px;
+}
+.msr_chack_05 p {
+  font-size: 14px;
+  padding-bottom: 5px;
+}
+.msr_chack_05 input[type=checkbox] {
+  display: none;
+  margin: 0;
+}
+.msr_chack_05 input[type=checkbox] + label {
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  line-height: 1.5px;
+  margin-right: 12px;
+  padding: 0 0 0 24px;
+  position: relative;
+}
+.msr_chack_05 input[type=checkbox] + label::before {
+  border: 1px solid #999999;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  content: "";
+  display: block;
+  margin-top: -9px;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 16px;
+  width: 16px;
+}
+.msr_chack_05 input[type=checkbox]:checked + label::after {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  content: "";
+  display: block;
+  position: absolute;
+  top: 50%;
+}
+.msr_chack_05 input[type=checkbox]:checked + label::after {
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #333333;
+  left: 3px;
+  margin-top: -6px;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  height: 6px;
+  width: 10px;
+}
+
+/*--------------------------------------
+繝励Ν繝繧ｦ繝ｳ
+---------------------------------------*/
+
+.msr_pulldown_05 {
+  padding-bottom: 20px;
+  position: relative;
+  width: 230px;
+}
+.msr_pulldown_05 p {
+  font-size: 14px;
+  padding-bottom: 5px;
+}
+.msr_pulldown_05 select {
+  appearance: none;
+  -moz-appearance: none;
+  -ms-appearance: none;
+  -webkit-appearance: none;
+  background:#FFFFFF;
+  border: 1px solid #999999;
+  border-radius: 0;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  cursor: pointer;
+  padding: 10px;
+  position:relative;
+  height: 40px;
+  width: 230px;
+}
+.msr_pulldown_05 label{
+  position:relative;
+}
+.msr_pulldown_05 label::after {
+  content:"";
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #333333;
+  right: 16px;
+  height: 8px;
+  margin-top: -5px;
+  transform: rotate(-45deg);
+  -webkit-transform: rotate(-45deg);
+  position:absolute;
+  top:50%;
+  width: 8px;
+}
+
+/*--------------------------------------
+繝輔ぃ繧､繝ｫ驕ｸ謚�
+---------------------------------------*/
+
+.designf {
+  padding-bottom: 10px;
+}
+
+.designf label {
+  border: 1px solid #999999;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  cursor: pointer;
+  display: block;
+  font-size: 14px;
+  padding: 8px;
+  position: relative;
+  height: 38px;
+  background-color: #e6e6e6;
+  border-radius: 3px;
+
+}
+
+.designf input[type=file] {
+  display: none;
+}
+.designf label:hover {
+  background-color: #d3d3d3;
+  color: #000;
+}
+
+/*--------------------------------------
+繝�く繧ｹ繝医お繝ｪ繧｢
+---------------------------------------*/
+
+.designt {
+  padding-bottom: 10px;
+  width: 460px;
+}
+.designt label {
+  display: block;
+  padding-bottom: 5px;
+}
+.designt textarea {
+  border: 1px solid #999999;
+  border-radius: 3px;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  padding: 10px;
+}
+
+/*--------------------------------------
+騾∽ｿ｡繝懊ち繝ｳ
+---------------------------------------*/
+.designb{
+  margin:0 0 10px;
+}
+
+.designb input[type=submit] {
+  background-color: #e6e6e6;
+  border:1px solid #999999;
+  border-radius: 3px;
+  color: #000000;
+  cursor: pointer;
+  padding: 10px;
+  text-align: center;
+  text-decoration: none;
+  transition: 0.2s ease-in-out;
+  -o-transition: 0.2s ease-in-out;
+  -moz-transition: 0.2s ease-in-out;
+  -webkit-transition: 0.2s ease-in-out;
+}
+.designb input[type=submit]:hover {
+  background-color: rgb(25, 100, 255);
+  color: #FFFFFF;
+}
+.designb input[disabled] {
+  cursor:default;
+  opacity: 0.5;
+}
+.designb input[disabled]:hover {
+  background-color: #FFFFFF;
+  color: #333333;
+}
+grey_t{
+    color: #aaaaaa;
+}
+.action_btn form{
+    display: inline-block;
+}

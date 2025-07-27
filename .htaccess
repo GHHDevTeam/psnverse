@@ -1,0 +1,7 @@
+RewriteEngine On
+
+RewriteRule ^user/([a-zA-Z0-9_]+)/?$ index.php?user=$1 [L,QSA]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [L,QSA]
