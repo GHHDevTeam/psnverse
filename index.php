@@ -125,6 +125,85 @@ function format_text($text) {
 
 $posts_file = __DIR__ . '/posts.json';
 $users_file = __DIR__ . '/users.json';
+$topics_file = __DIR__ . '/topics.json';
+
+// トピック一覧
+function get_topics($file) {
+    if (!file_exists($file)) return [];
+    $json = file_get_contents($file);
+    $data = json_decode($json, true);
+    return is_array($data) ? $data : [];
+}
+
+// トピック追加
+function add_topic($file, $title, $description, $author, $author_id) {
+    $topics = get_topics($file);
+    $id = uniqid();
+    $topic = [
+        'id' => $id,
+        'title' => $title,
+        'description' => $description,
+        'author' => $author,
+        'author_id' => $author_id,
+        'created' => date('Y年m月d日 H:i'),
+        'post_count' => 0
+    ];
+    $topics[] = $topic;
+    file_put_contents($file, json_encode($topics, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+    return $id;
+}
+
+// トピック取得
+function get_topic_by_id($file, $id) {
+    $topics = get_topics($file);
+    foreach ($topics as $topic) {
+        if ($topic['id'] === $id) {
+            return $topic;
+        }
+    }
+    return null;
+}
+
+// トピック削除
+function delete_topic($file, $topic_id, $user_id) {
+    $topics = get_topics($file);
+    $updated_topics = [];
+    $deleted = false;
+    
+    foreach ($topics as $topic) {
+        if ($topic['id'] === $topic_id && $topic['author_id'] === '@' . $user_id) {
+            $deleted = true;
+            continue; // このトピックを除外
+        }
+        $updated_topics[] = $topic;
+    }
+    
+    if ($deleted) {
+        file_put_contents($file, json_encode($updated_topics, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+    }
+    
+    return $deleted;
+}
+
+// トピック別投稿数更新
+function update_topic_post_count($file, $topic_id) {
+    $topics = get_topics($file);
+    foreach ($topics as &$topic) {
+        if ($topic['id'] === $topic_id) {
+            // このトピックの投稿数をカウント
+            $posts = get_posts($GLOBALS['posts_file']);
+            $count = 0;
+            foreach ($posts as $post) {
+                if (isset($post['topic_id']) && $post['topic_id'] === $topic_id) {
+                    $count++;
+                }
+            }
+            $topic['post_count'] = $count;
+            file_put_contents($file, json_encode($topics, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+            break;
+        }
+    }
+}
 
 // 投稿一覧
 function get_posts($file) {
@@ -217,7 +296,7 @@ function get_user_by_id($file, $user_id) {
 }
 
 // 投稿追加
-function add_post($file, $title, $body, $author, $author_id, $image = null) {
+function add_post($file, $title, $body, $author, $author_id, $image = null, $topic_id = null) {
     $posts = get_posts($file);
     $id = uniqid();
     $post = [
@@ -234,13 +313,16 @@ function add_post($file, $title, $body, $author, $author_id, $image = null) {
     if ($image) {
         $post['image'] = $image;
     }
+    if ($topic_id) {
+        $post['topic_id'] = $topic_id;
+    }
     $posts[] = $post;
     file_put_contents($file, json_encode($posts, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
     return $id;
 }
 
 // ゲスト投稿（パスワード付き）
-function add_guest_post($file, $title, $body, $author, $author_id, $password, $image = null) {
+function add_guest_post($file, $title, $body, $author, $author_id, $password, $image = null, $topic_id = null) {
     $posts = get_posts($file);
     $id = uniqid();
     $post = [
@@ -257,6 +339,9 @@ function add_guest_post($file, $title, $body, $author, $author_id, $password, $i
     ];
     if ($image) {
         $post['image'] = $image;
+    }
+    if ($topic_id) {
+        $post['topic_id'] = $topic_id;
     }
     $posts[] = $post;
     file_put_contents($file, json_encode($posts, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
@@ -720,6 +805,272 @@ EOD;
         break;
 
     case 'topic':
+        render_header('トピック - Psnverse');
+        
+        // トピック作成処理（ログインユーザーのみ）
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_topic']) && isset($_SESSION['user'])) {
+            $title = trim($_POST['topic_title'] ?? '');
+            $description = trim($_POST['topic_description'] ?? '');
+            
+            if ($title && $description) {
+                $topic_id = add_topic($topics_file, $title, $description, $_SESSION['user'], '@' . $_SESSION['user_id']);
+                header('Location: ?topic&view=' . urlencode($topic_id));
+                exit;
+            }
+        }
+        
+        // トピック削除処理（作成者のみ）
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_topic']) && isset($_SESSION['user'])) {
+            $topic_id = $_POST['delete_topic'];
+            if (delete_topic($topics_file, $topic_id, $_SESSION['user_id'])) {
+                // トピック内の投稿も削除
+                $posts = get_posts($posts_file);
+                $updated_posts = array_filter($posts, function($post) use ($topic_id) {
+                    return !isset($post['topic_id']) || $post['topic_id'] !== $topic_id;
+                });
+                file_put_contents($posts_file, json_encode(array_values($updated_posts), JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT));
+                header('Location: ?topic');
+                exit;
+            }
+        }
+        
+        // 特定のトピック表示
+        if (isset($_GET['view'])) {
+            $topic_id = $_GET['view'];
+            $topic = get_topic_by_id($topics_file, $topic_id);
+            
+            if ($topic) {
+                // トピック内投稿処理
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['post_pv_value'])) {
+                    $body = trim($_POST['post_pv_value']);
+                    
+                    if ($body) {
+                        if (isset($_SESSION['user'])) {
+                            $name = trim($_POST['poster_name'] ?? $_SESSION['user']);
+                            $author_id = '@' . $_SESSION['user_id'];
+                            $image = handle_image_upload();
+                            $id = add_post($posts_file, '', $body, $name, $author_id, $image, $topic_id);
+                        } else {
+                            $name = trim($_POST['poster_name'] ?? 'ゲスト');
+                            $password = $_POST['password'] ?? '';
+                            if ($password) {
+                                $guest_id = generate_guest_id($_SERVER['REMOTE_ADDR']);
+                                $id = add_guest_post($posts_file, '', $body, $name, $guest_id, $password, null, $topic_id);
+                            } else {
+                                echo '<p style="color:red;">ゲスト投稿にはパスワードが必要です。</p>';
+                            }
+                        }
+                        if (isset($id)) {
+                            update_topic_post_count($topics_file, $topic_id);
+                            header('Location: ?id=' . urlencode($id));
+                            exit;
+                        }
+                    }
+                }
+                
+                // グッド処理
+                if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['good_button'])) {
+                    $current_user_id = $_SESSION['user_id'] ?? generate_guest_id($_SERVER['REMOTE_ADDR']);
+                    if (!isset($_SESSION['user_id'])) {
+                        $current_user_id = $current_user_id;
+                    } else {
+                        $current_user_id = '@' . $current_user_id;
+                    }
+                    toggle_good($posts_file, $_POST['good_button'], $current_user_id);
+                    header('Location: ?topic&view=' . urlencode($topic_id));
+                    exit;
+                }
+                
+                // トピック情報表示
+                echo '<article class="topic-header">';
+                echo '<h2>' . htmlspecialchars($topic['title']) . '</h2>';
+                echo '<p>' . format_text($topic['description']) . '</p>';
+                echo '<div class="topic-info">';
+                echo '<span class="topic-author">作成者: ';
+                if (strpos($topic['author_id'], '@') !== false) {
+                    echo '<a href="?user=' . htmlspecialchars(ltrim($topic['author_id'], '@')) . '">' . htmlspecialchars($topic['author']) . '</a>';
+                } else {
+                    echo htmlspecialchars($topic['author']);
+                }
+                echo '</span>';
+                echo ' | <span class="topic-created">' . htmlspecialchars($topic['created']) . '</span>';
+                echo ' | <span class="topic-posts">投稿数: ' . ($topic['post_count'] ?? 0) . '</span>';
+                
+                // 削除ボタン（作成者のみ）
+                if (isset($_SESSION['user']) && $topic['author_id'] === '@' . $_SESSION['user_id']) {
+                    echo ' | <form style="display:inline;" method="post">';
+                    echo '<button type="submit" name="delete_topic" value="' . htmlspecialchars($topic['id']) . '" onclick="return confirm(\'このトピックと全ての投稿を削除しますか？\')" style="color:red;">削除</button>';
+                    echo '</form>';
+                }
+                echo '</div>';
+                echo '</article>';
+                
+                // 投稿フォーム
+                if (isset($_SESSION['user'])) {
+                    $name_input = '<input id="poster_name" name="poster_name" type="text" placeholder="お名前" size="30" value="' . htmlspecialchars($_SESSION['user']) . '"/>
+                    <input id="password" name="password" type="hidden" value=""/>';
+                    $image_upload = '<div class="image-upload-container">
+<ele class="designf">
+<label style="width:51px;">画像<input type="file" name="post_pv_image" id="post_pv_image" onchange="selected_img.value = this.value.replace(/.*\\\\/g ,\'\');"/></label>
+</ele>
+<ele class="design1">
+<input id="selected_img" type="text" value="画像が選択されていません。" disabled size="60"/>
+</ele>
+</div>';
+                } else {
+                    $name_input = '<input id="poster_name" name="poster_name" type="text" placeholder="お名前" size="30" required/>
+                    <input id="password" name="password" type="password" placeholder="削除用パスワード" size="30" required/>';
+                    $image_upload = '';
+                }
+                
+                echo <<<EOD
+<form action="" method="post" enctype="multipart/form-data">
+<div class="post-form">
+<ele class="design1">
+{$name_input}
+</ele><br>
+<ele class="designt">
+<textarea id="post_pv_value" name="post_pv_value" rows="8" cols="69" oninput="post_pv_onchange()" placeholder="このトピックに投稿してください..."></textarea>
+</ele><br>
+{$image_upload}
+<ele class="designb">
+<input class="submit-btn" type="submit" value="投稿" id="post_pv_button" disabled/>
+</ele>
+</div>
+</form>
+<script>
+function post_pv_onchange() {
+    let ppb = document.getElementById("post_pv_button");
+    if (document.getElementById("post_pv_value").value.length == 0) {
+        ppb.disabled = true;
+    } else {
+        ppb.disabled = false;
+    }
+};
+</script>
+EOD;
+                
+                // トピック内の投稿一覧
+                $topic_posts = [];
+                $all_posts = get_posts($posts_file);
+                foreach ($all_posts as $post) {
+                    if (isset($post['topic_id']) && $post['topic_id'] === $topic_id) {
+                        $topic_posts[] = $post;
+                    }
+                }
+                
+                echo '<section>';
+                if ($topic_posts) {
+                    foreach (array_reverse($topic_posts) as $post) {
+                        echo '<article>';
+                        echo '<div class="link1">';
+                        echo '<a href="?id=' . urlencode($post['id']) . '" style="text-decoration:none;color: black;">';
+                        echo '<div class="info">';
+                        if (strpos($post['author_id'], '@') === false) {
+                            echo '<h2 style="display:inline;"><object>' . htmlspecialchars($post['author']) . '</object></h2>';
+                        } else {
+                            echo '<h2 style="display:inline;"><object><a style="text-decoration:none;" href="?user=' . htmlspecialchars(ltrim($post['author_id'], '@')) . '">' . htmlspecialchars($post['author']) . '</a></object></h2>';
+                        }
+                        echo ' <grey_t style="font-size:12.5px;">[ID_' . htmlspecialchars($post['author_id']) . ']</grey_t><br>';
+                        echo '<time><grey_t>' . htmlspecialchars($post['created']) . '</grey_t></time><br><br>';
+                        echo '</div>';
+                        
+                        if (isset($post['image'])) {
+                            echo '<a href="' . htmlspecialchars($post['image']) . '" target="_blank">';
+                            echo '<img class="post-image" src="' . htmlspecialchars($post['image']) . '"/></a><br>';
+                        }
+                        
+                        echo '<p>' . format_text($post['body']) . '</p>';
+                        echo '</a>';
+                        
+                        echo '<object>';
+                        echo '<div class="action_btn">';
+                        echo '<form style="display:inline" action="" method="post">';
+                        echo '<button name="good_button" type="submit" value="' . htmlspecialchars($post['id']) . '">';
+                        echo '<img src="./image/good.png" width="14" height="14" style="margin-right:4px;"/>';
+                        echo 'グッド ' . ($post['good_count'] ?? 0);
+                        echo '</button>';
+                        echo '</form>';
+                        echo '<form style="display:inline" action="?id=' . urlencode($post['id']) . '" method="get">';
+                        echo '<button type="submit">↰ 返信 ' . ($post['reply_count'] ?? 0) . '</button>';
+                        echo '</form>';
+                        echo '</div></object>';
+                        echo '</div>';
+                        echo '</article>';
+                    }
+                } else {
+                    echo '<p>まだ投稿がありません。最初の投稿をしてみましょう！</p>';
+                }
+                echo '</section>';
+            } else {
+                echo '<h1>トピックが見つかりません</h1>';
+            }
+        } else {
+            // トピック一覧表示
+            echo '<article>';
+            echo '<h2>トピック一覧</h2>';
+            echo '<p>興味のあるトピックを選んで投稿してみましょう！</p>';
+            echo '</article>';
+            
+            // トピック作成フォーム（ログインユーザーのみ）
+            if (isset($_SESSION['user'])) {
+                echo <<<EOD
+<div class="topic-create-form">
+<h3>新しいトピックを作成</h3>
+<form method="post">
+<ele class="design1">
+<input type="text" name="topic_title" placeholder="トピック名" required/>
+</ele><br>
+<ele class="designt">
+<textarea name="topic_description" rows="4" cols="69" placeholder="トピックの説明を入力してください..." required></textarea>
+</ele><br>
+<ele class="designb">
+<input type="submit" name="create_topic" value="トピック作成" class="submit-btn"/>
+</ele>
+</form>
+</div>
+EOD;
+            } else {
+                echo '<p><a href="?signin">ログイン</a>するとトピックを作成できます。</p>';
+            }
+            
+            // 既存トピック一覧
+            $topics = get_topics($topics_file);
+            if ($topics) {
+                echo '<section class="topic-list">';
+                foreach (array_reverse($topics) as $topic) {
+                    // 投稿数を更新
+                    update_topic_post_count($topics_file, $topic['id']);
+                    $topic = get_topic_by_id($topics_file, $topic['id']); // 更新後のデータを取得
+                    
+                    echo '<article class="topic-item">';
+                    echo '<div class="topic-link">';
+                    echo '<a href="?topic&view=' . urlencode($topic['id']) . '" style="text-decoration:none;color: black;">';
+                    echo '<h3>' . htmlspecialchars($topic['title']) . '</h3>';
+                    echo '<p>' . format_text($topic['description']) . '</p>';
+                    echo '<div class="topic-meta">';
+                    echo '<span>作成者: ';
+                    if (strpos($topic['author_id'], '@') !== false) {
+                        echo '<a href="?user=' . htmlspecialchars(ltrim($topic['author_id'], '@')) . '" class="author-link">' . htmlspecialchars($topic['author']) . '</a>';
+                    } else {
+                        echo htmlspecialchars($topic['author']);
+                    }
+                    echo '</span> | ';
+                    echo '<span>' . htmlspecialchars($topic['created']) . '</span> | ';
+                    echo '<span>投稿数: ' . ($topic['post_count'] ?? 0) . '</span>';
+                    echo '</div>';
+                    echo '</a>';
+                    echo '</div>';
+                    echo '</article>';
+                }
+                echo '</section>';
+            } else {
+                echo '<p>まだトピックがありません。最初のトピックを作成してみましょう！</p>';
+            }
+        }
+        render_footer();
+        break;
+
     case 'index':
     default:
         render_header('コミュニティ - Psnverse');
@@ -823,11 +1174,18 @@ function post_pv_onchange() {
 </script>
 EOD;
         
-        // 投稿一覧表示
+        // 投稿一覧表示（トピックに属さない投稿のみ）
         $posts = get_posts($posts_file);
+        $general_posts = [];
+        foreach ($posts as $post) {
+            if (!isset($post['topic_id']) || empty($post['topic_id'])) {
+                $general_posts[] = $post;
+            }
+        }
+        
         echo '<section>';
-        if ($posts) {
-            foreach (array_reverse($posts) as $post) {
+        if ($general_posts) {
+            foreach (array_reverse($general_posts) as $post) {
                 echo '<article>';
                 echo '<div class="link1">';
                 echo '<a href="?id=' . urlencode($post['id']) . '" style="text-decoration:none;color: black;">';
@@ -873,7 +1231,7 @@ EOD;
                 echo '</article>';
             }
         } else {
-            echo '<p>投稿はまだありません。</p>';
+            echo '<p>投稿はまだありません。<a href="?topic">トピック</a>から話題を選んで投稿するか、ここで一般的な投稿をしてみましょう。</p>';
         }
         echo '</section>';
         render_footer();
