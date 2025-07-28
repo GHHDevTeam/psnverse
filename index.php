@@ -935,7 +935,7 @@ EOD;
 </ele><br>
 {$image_upload}
 <ele class="designb">
-<input class="submit-btn" type="submit" value="投稿" id="post_pv_button" disabled/>
+<input class="submit-btn" style="width:523px;" type="submit" value="投稿" id="post_pv_button" disabled/>
 </ele>
 </div>
 </form>
@@ -1020,13 +1020,13 @@ EOD;
 <h3>新しいトピックを作成</h3>
 <form method="post">
 <ele class="design1">
-<input type="text" name="topic_title" placeholder="トピック名" required/>
+<input type="text" name="topic_title" size="67" placeholder="トピック名" required/>
 </ele><br>
 <ele class="designt">
 <textarea name="topic_description" rows="4" cols="69" placeholder="トピックの説明を入力してください..." required></textarea>
 </ele><br>
 <ele class="designb">
-<input type="submit" name="create_topic" value="トピック作成" class="submit-btn"/>
+<input type="submit" name="create_topic" value="トピック作成" style="width:520px;" class="submit-btn"/>
 </ele>
 </form>
 </div>
@@ -1159,7 +1159,7 @@ EOD;
 </ele><br>
 {$image_upload}
 <ele class="designb">
-<input class="submit-btn" type="submit" value="投稿" id="post_pv_button" disabled/>
+<input class="submit-btn" style="width:523px;" type="submit" value="投稿" id="post_pv_button" disabled/>
 </ele>
 </div>
 </form>
