@@ -446,6 +446,7 @@ EOD;
         echo <<<EOD
 <center>
 <h2>更新履歴</h2>
+<p>2025年7月28日 - トピックの実装</p>
 <p>2025年7月27日 - Psnverse復刻版リリース</p>
 <p>2020年8月14日 - <a href="https://web.archive.org/web/20200817074142/http://psnverse.66ghz.com/?changelog">オリジナル版最終更新</a></p>
 </center>
